@@ -1,4 +1,4 @@
 # test-auto-merge-action
 
 Some more info
-TEst
+My main changes
