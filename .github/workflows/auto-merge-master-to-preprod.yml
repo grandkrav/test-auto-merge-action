@@ -1,4 +1,4 @@
-name: Update cms/master
+name: Auto-Merge master to preprod
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 jobs:
   update-preprod:
     permissions: write-all
-    name: Merge main into preprod
+    name: Merge master into preprod
     runs-on: ubuntu-latest
     steps:
       - name: checkout
