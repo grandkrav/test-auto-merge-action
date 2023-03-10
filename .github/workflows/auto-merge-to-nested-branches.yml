@@ -1,0 +1,48 @@
+name: Create PRs for changes in master branch
+
+on:
+  push:
+    branches:
+      - master
+      - preprod
+      - sandbox
+
+jobs:
+  create_prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Create a pull request for preprod branch
+      - name: Create preprod PR
+        if: github.ref == 'refs/heads/master' 
+        uses: peter-evans/create-pull-request@v3
+        with:
+          branch: preprod
+          title: Merge changes from master to preprod
+          body: |
+            This PR merges changes from master to preprod branch.
+          labels: automerge
+
+      # Create a pull request for sandbox branch
+      - name: Create sandbox PR
+        if: github.ref == 'refs/heads/master'
+        uses: peter-evans/create-pull-request@v3
+        with:
+          branch: sandbox
+          title: Merge changes from master to sandbox
+          body: |
+            This PR merges changes from master to sandbox branch.
+          labels: automerge
+
+      # Create a pull request for dev branch
+      - name: Create dev PR
+        if: github.ref == 'refs/heads/master'
+        uses: peter-evans/create-pull-request@v3
+        with:
+          branch: dev
+          title: Merge changes from master to dev
+          body: |
+            This PR merges changes from master to dev branch.
+          labels: automerge
