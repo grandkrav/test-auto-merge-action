@@ -11,43 +11,44 @@ jobs:
   create_prs:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      # - name: Checkout code
+        # uses: actions/checkout@v2
 
-      - name: Extract branch name
-        shell: bash
-        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
-        id: extract_branch
+      # - name: Extract branch name
+      #   shell: bash
+      #   run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
+      #   id: extract_branch
 
       # Create a pull request for preprod branch
-      - name: Create preprod PR
-        if: github.ref == 'refs/heads/main' 
-        uses: peter-evans/create-pull-request@v3
+      - uses: actions/checkout@v3
         with:
-          branch: preprod
-          title: Merge changes from ${{ steps.extract_branch.outputs.BRANCH_NAME }} to preprod
-          body: |
-            This PR merges changes from ${{ steps.extract_branch.outputs.BRANCH_NAME }} to preprod branch.
-          labels: automerge
-
+          ref: preprod
+      - name: Reset promotion branch
+        run: |
+          git fetch origin main:main
+          git reset --hard main
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          branch: production-promotion
       # Create a pull request for sandbox branch
-      - name: Create sandbox PR
-        if: github.ref == 'refs/heads/main'
-        uses: peter-evans/create-pull-request@v3
-        with:
-          branch: sandbox
-          title: Merge changes from ${{ steps.extract_branch.outputs.BRANCH_NAME }} to sandbox
-          body: |
-            This PR merges changes from ${{ steps.extract_branch.outputs.BRANCH_NAME }} to sandbox branch.
-          labels: automerge
+      # - name: Create sandbox PR
+      #   if: github.ref == 'refs/heads/main'
+      #   uses: peter-evans/create-pull-request@v3
+      #   with:
+      #     branch: sandbox
+      #     title: Merge changes from ${{ steps.extract_branch.outputs.BRANCH_NAME }} to sandbox
+      #     body: |
+      #       This PR merges changes from ${{ steps.extract_branch.outputs.BRANCH_NAME }} to sandbox branch.
+      #     labels: automerge
 
       # Create a pull request for dev branch
-      - name: Create dev PR
-        if: github.ref == 'refs/heads/main'
-        uses: peter-evans/create-pull-request@v3
-        with:
-          branch: dev
-          title: Merge changes from ${{ steps.extract_branch.outputs.BRANCH_NAME }} to dev
-          body: |
-            This PR merges changes from ${{ steps.extract_branch.outputs.BRANCH_NAME }} to dev branch.
-          labels: automerge
+      # - name: Create dev PR
+      #   if: github.ref == 'refs/heads/main'
+      #   uses: peter-evans/create-pull-request@v3
+      #   with:
+      #     branch: dev
+      #     title: Merge changes from ${{ steps.extract_branch.outputs.BRANCH_NAME }} to dev
+      #     body: |
+      #       This PR merges changes from ${{ steps.extract_branch.outputs.BRANCH_NAME }} to dev branch.
+      #     labels: automerge
