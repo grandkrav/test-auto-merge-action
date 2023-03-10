@@ -1,14 +1,14 @@
-name: Auto-Merge preprod to sandbox
+name: Auto-Merge sandbox to dev
 
 on:
   push:
     branches:
-      - preprod
+      - sandbox
 
 jobs:
   update-sandbox:
     permissions: write-all
-    name: Merge preprod into sandbox
+    name: Merge sandbox into dev
     runs-on: ubuntu-latest
     steps:
       - name: checkout
@@ -18,6 +18,6 @@ jobs:
         id: merge
         with:
           github_token: ${{ github.token }}
-          source: 'preprod'
-          target: 'sandbox'
+          source: 'sandbox'
+          target: 'dev'
           webhook_url: #if present add the Slack webhook
