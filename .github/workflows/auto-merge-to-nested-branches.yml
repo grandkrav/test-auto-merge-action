@@ -16,7 +16,7 @@ jobs:
 
       - name: Extract branch name
         shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
         id: extract_branch
 
       # Create a pull request for preprod branch
@@ -25,9 +25,9 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         with:
           branch: preprod
-          title: Merge changes from ${{ steps.extract_branch.outputs.branch }} to preprod
+          title: Merge changes from ${{ steps.extract_branch.outputs.BRANCH_NAME }} to preprod
           body: |
-            This PR merges changes from ${{ steps.extract_branch.outputs.branch }} to preprod branch.
+            This PR merges changes from ${{ steps.extract_branch.outputs.BRANCH_NAME }} to preprod branch.
           labels: automerge
 
       # Create a pull request for sandbox branch
@@ -36,9 +36,9 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         with:
           branch: sandbox
-          title: Merge changes from ${{ steps.extract_branch.outputs.branch }} to sandbox
+          title: Merge changes from ${{ steps.extract_branch.outputs.BRANCH_NAME }} to sandbox
           body: |
-            This PR merges changes from ${{ steps.extract_branch.outputs.branch }} to sandbox branch.
+            This PR merges changes from ${{ steps.extract_branch.outputs.BRANCH_NAME }} to sandbox branch.
           labels: automerge
 
       # Create a pull request for dev branch
@@ -47,7 +47,7 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         with:
           branch: dev
-          title: Merge changes from ${{ steps.extract_branch.outputs.branch }} to dev
+          title: Merge changes from ${{ steps.extract_branch.outputs.BRANCH_NAME }} to dev
           body: |
-            This PR merges changes from ${{ steps.extract_branch.outputs.branch }} to dev branch.
+            This PR merges changes from ${{ steps.extract_branch.outputs.BRANCH_NAME }} to dev branch.
           labels: automerge
