@@ -1,9 +1,9 @@
-name: Create PRs for changes in master branch
+name: Create PRs for changes in main branch
 
 on:
   push:
     branches:
-      - master
+      - main
       - preprod
       - sandbox
 
@@ -16,33 +16,33 @@ jobs:
 
       # Create a pull request for preprod branch
       - name: Create preprod PR
-        if: github.ref == 'refs/heads/master' 
+        if: github.ref == 'refs/heads/main' 
         uses: peter-evans/create-pull-request@v3
         with:
           branch: preprod
-          title: Merge changes from master to preprod
+          title: Merge changes from main to preprod
           body: |
-            This PR merges changes from master to preprod branch.
+            This PR merges changes from main to preprod branch.
           labels: automerge
 
       # Create a pull request for sandbox branch
       - name: Create sandbox PR
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         uses: peter-evans/create-pull-request@v3
         with:
           branch: sandbox
-          title: Merge changes from master to sandbox
+          title: Merge changes from main to sandbox
           body: |
-            This PR merges changes from master to sandbox branch.
+            This PR merges changes from main to sandbox branch.
           labels: automerge
 
       # Create a pull request for dev branch
       - name: Create dev PR
-        if: github.ref == 'refs/heads/master'
+        if: github.ref == 'refs/heads/main'
         uses: peter-evans/create-pull-request@v3
         with:
           branch: dev
-          title: Merge changes from master to dev
+          title: Merge changes from main to dev
           body: |
-            This PR merges changes from master to dev branch.
+            This PR merges changes from main to dev branch.
           labels: automerge
