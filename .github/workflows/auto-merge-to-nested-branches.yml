@@ -8,29 +8,36 @@ on:
       - sandbox
 
 jobs:
-  create_prs:
+  createAutoPullRequests:
     runs-on: ubuntu-latest
     steps:
-      # - name: Checkout code
-        # uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      # - name: Extract branch name
-      #   shell: bash
-      #   run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
-      #   id: extract_branch
+      - name: Extract branch name
+        shell: bash
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
+        id: extract_branch
 
       # Create a pull request for preprod branch
       - uses: actions/checkout@v3
+        if: github.ref == 'refs/heads/main'
         with:
           ref: preprod
       - name: Reset promotion branch
+        if: github.ref == 'refs/heads/main'
         run: |
           git fetch origin main:main
           git reset --hard main
       - name: Create Pull Request
+        if: github.ref == 'refs/heads/main'
         uses: peter-evans/create-pull-request@v4
         with:
-          branch: production-promotion
+          branch: preprod-promotion
+          title: Merge changes from ${{ steps.extract_branch.outputs.BRANCH_NAME }} to sandbox
+          body: |
+            This PR merges changes from ${{ steps.extract_branch.outputs.BRANCH_NAME }} to sandbox branch.
+          labels: automerge
       # Create a pull request for sandbox branch
       # - name: Create sandbox PR
       #   if: github.ref == 'refs/heads/main'
