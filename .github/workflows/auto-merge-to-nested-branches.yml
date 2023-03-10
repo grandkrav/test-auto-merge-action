@@ -14,15 +14,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Extract branch name
+        shell: bash
+        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        id: extract_branch
+
       # Create a pull request for preprod branch
       - name: Create preprod PR
         if: github.ref == 'refs/heads/main' 
         uses: peter-evans/create-pull-request@v3
         with:
           branch: preprod
-          title: Merge changes from main to preprod
+          title: Merge changes from ${{ steps.extract_branch.outputs.branch }} to preprod
           body: |
-            This PR merges changes from main to preprod branch.
+            This PR merges changes from ${{ steps.extract_branch.outputs.branch }} to preprod branch.
           labels: automerge
 
       # Create a pull request for sandbox branch
@@ -31,9 +36,9 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         with:
           branch: sandbox
-          title: Merge changes from main to sandbox
+          title: Merge changes from ${{ steps.extract_branch.outputs.branch }} to sandbox
           body: |
-            This PR merges changes from main to sandbox branch.
+            This PR merges changes from ${{ steps.extract_branch.outputs.branch }} to sandbox branch.
           labels: automerge
 
       # Create a pull request for dev branch
@@ -42,7 +47,7 @@ jobs:
         uses: peter-evans/create-pull-request@v3
         with:
           branch: dev
-          title: Merge changes from main to dev
+          title: Merge changes from ${{ steps.extract_branch.outputs.branch }} to dev
           body: |
-            This PR merges changes from main to dev branch.
+            This PR merges changes from ${{ steps.extract_branch.outputs.branch }} to dev branch.
           labels: automerge
