@@ -1,0 +1,22 @@
+name: AutoMerge pull-requests
+on:  
+  pull_request:
+    branches:
+      - main
+      - preprod
+      - sandbox
+      - dev
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  AutoMerge:
+    if: contains(github.event.pull_request.labels.*.name, 'automerge')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: peter-evans/enable-pull-request-automerge@v2
+        with:
+          pull-request-number: ${{ github.event.pull_request.number }}
+          merge-method: merge

@@ -30,7 +30,7 @@ jobs:
         run: |
           git fetch origin main:main
           git reset --hard main
-      - name: Create Pull Request
+      - name: Create preprod Pull Request
         if: contains(fromJSON('["main"]'), steps.extract_branch.outputs.BRANCH_NAME)
         uses: peter-evans/create-pull-request@v4
         with:
