@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   AutoMerge:
-    if: contains(github.event.pull_request.labels.*.name, 'automerge')
+    # if: contains(github.event.pull_request.labels.*.name, 'automerge')
     runs-on: ubuntu-latest
     steps:
       - uses: peter-evans/enable-pull-request-automerge@v2
