@@ -20,7 +20,7 @@ jobs:
         id: extract_branch
 
       # Create a pull request for preprod branch
-      - name: Checkout ${{ steps.extract_branch.outputs.BRANCH_NAME }}
+      - name: Checkout preprod
         uses: actions/checkout@v3
         if: contains(fromJSON('["main"]'), steps.extract_branch.outputs.BRANCH_NAME)
         with:
