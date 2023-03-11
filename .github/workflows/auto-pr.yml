@@ -22,8 +22,8 @@ jobs:
 
       - name: Reset promotion branch
         run: |
-          git fetch origin main:main
-          git reset --hard main
+          git fetch origin ${{ github.ref_name }}:${{ github.ref_name }}
+          git reset --hard ${{ github.ref_name }}
 
       - name: Create preprod Pull Request
         id: create_pull_request_preprod
@@ -52,7 +52,14 @@ jobs:
           number: ${{ steps.create_pull_request_preprod.outputs.pull-request-number }}
 
   create-sandbox-pull-request:
-    if: contains(fromJSON('["main"]'), github.ref_name)
+    if: contains(fromJSON('["main", "preprod"]'), github.ref_name)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+  create-dev-pull-request:
+    if: contains(fromJSON('["main", "preprod", "sandbox"]'), github.ref_name)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
