@@ -8,32 +8,25 @@ on:
       - sandbox
 
 jobs:
-  createPreprodPullRequest:
+  create-preprod-pull-request:
+    if: contains(fromJSON('["main"]'), github.ref_name)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # - name: Extract branch name
-      #   shell: bash
-      #   run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
-      #   id: extract_branch
-
       - name: Checkout preprod
         uses: actions/checkout@v3
-        if: contains(fromJSON('["main"]'), github.ref_name)
         with:
           ref: preprod
 
       - name: Reset promotion branch
-        if: contains(fromJSON('["main"]'), github.ref_name)
         run: |
           git fetch origin main:main
           git reset --hard main
 
       - name: Create preprod Pull Request
         id: create_pull_request_preprod
-        if: contains(fromJSON('["main"]'), github.ref_name)
         uses: peter-evans/create-pull-request@v4
         with:
           branch: preprod-promotion
@@ -57,3 +50,10 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           number: ${{ steps.create_pull_request_preprod.outputs.pull-request-number }}
+
+  create-sandbox-pull-request:
+    if: contains(fromJSON('["main"]'), github.ref_name)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
