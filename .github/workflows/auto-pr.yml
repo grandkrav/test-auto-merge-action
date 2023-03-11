@@ -25,12 +25,15 @@ jobs:
         if: contains(fromJSON('["main"]'), steps.extract_branch.outputs.BRANCH_NAME)
         with:
           ref: preprod
+
       - name: Reset promotion branch
         if: contains(fromJSON('["main"]'), steps.extract_branch.outputs.BRANCH_NAME)
         run: |
           git fetch origin main:main
           git reset --hard main
+
       - name: Create preprod Pull Request
+        id: create_pull_request_preprod
         if: contains(fromJSON('["main"]'), steps.extract_branch.outputs.BRANCH_NAME)
         uses: peter-evans/create-pull-request@v4
         with:
@@ -39,24 +42,11 @@ jobs:
           body: |
             This PR merges changes from ${{ steps.extract_branch.outputs.BRANCH_NAME }} to preprod branch.
           labels: automerge
-      # Create a pull request for sandbox branch
-      # - name: Create sandbox PR
-      #   if: github.ref == 'refs/heads/main'
-      #   uses: peter-evans/create-pull-request@v3
-      #   with:
-      #     branch: sandbox
-      #     title: Merge changes from ${{ steps.extract_branch.outputs.BRANCH_NAME }} to sandbox
-      #     body: |
-      #       This PR merges changes from ${{ steps.extract_branch.outputs.BRANCH_NAME }} to sandbox branch.
-      #     labels: automerge
+          token: ${{ secrets.PAT }}
 
-      # Create a pull request for dev branch
-      # - name: Create dev PR
-      #   if: github.ref == 'refs/heads/main'
-      #   uses: peter-evans/create-pull-request@v3
-      #   with:
-      #     branch: dev
-      #     title: Merge changes from ${{ steps.extract_branch.outputs.BRANCH_NAME }} to dev
-      #     body: |
-      #       This PR merges changes from ${{ steps.extract_branch.outputs.BRANCH_NAME }} to dev branch.
-      #     labels: automerge
+      - name: Auto approve
+        if: steps.create_pull_request_preprod.outputs.pull-request-operation == 'created'
+        uses: juliangruber/approve-pull-request-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ steps.cpr.outputs.pull-request-number }}
