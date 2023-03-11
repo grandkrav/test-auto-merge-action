@@ -1,0 +1,60 @@
+name: Create PRs for changes in main branch
+
+on:
+  push:
+    branches:
+      - main
+      - preprod
+      - sandbox
+
+jobs:
+  createAutoPullRequests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Extract branch name
+        shell: bash
+        run: echo "BRANCH_NAME=$(echo ${GITHUB_REF#refs/heads/})" >> $GITHUB_OUTPUT
+        id: extract_branch
+
+      # Create a pull request for preprod branch
+      - name: Checkout preprod
+        uses: actions/checkout@v3
+        if: contains(fromJSON('["main"]'), steps.extract_branch.outputs.BRANCH_NAME)
+        with:
+          ref: preprod
+
+      - name: Reset promotion branch
+        if: contains(fromJSON('["main"]'), steps.extract_branch.outputs.BRANCH_NAME)
+        run: |
+          git fetch origin main:main
+          git reset --hard main
+
+      - name: Create preprod Pull Request
+        id: create_pull_request_preprod
+        if: contains(fromJSON('["main"]'), steps.extract_branch.outputs.BRANCH_NAME)
+        uses: peter-evans/create-pull-request@v4
+        with:
+          branch: preprod-promotion
+          title: Merge changes from ${{ steps.extract_branch.outputs.BRANCH_NAME }} to preprod
+          body: |
+            This PR merges changes from ${{ steps.extract_branch.outputs.BRANCH_NAME }} to preprod branch.
+          labels: automerge
+          token: ${{ secrets.AUTO_MERGE_PAT }}
+
+      - name: Enable Pull Request Automerge
+        if: steps.create_pull_request_preprod.outputs.pull-request-operation == 'created'
+        uses: peter-evans/enable-pull-request-automerge@v2
+        with:
+          token: ${{ secrets.AUTO_MERGE_PAT }}
+          pull-request-number: ${{ steps.create_pull_request_preprod.outputs.pull-request-number }}
+          merge-method: merge
+
+      - name: Auto approve
+        if: steps.create_pull_request_preprod.outputs.pull-request-operation == 'created'
+        uses: juliangruber/approve-pull-request-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ steps.create_pull_request_preprod.outputs.pull-request-number }}
