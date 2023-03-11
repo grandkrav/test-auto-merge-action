@@ -2,11 +2,11 @@ name: AutoMerge pull-requests
 
 on:  
   pull_request:
-    branches:
-      - main
-      - preprod
-      - sandbox
-      - dev
+    # branches:
+    #   - main
+    #   - preprod
+    #   - sandbox
+    #   - dev
 
 permissions:
   pull-requests: write
