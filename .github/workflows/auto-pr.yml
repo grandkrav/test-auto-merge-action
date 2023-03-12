@@ -1,0 +1,128 @@
+name: Create auto-merge Pull Requests
+
+on:
+  push:
+    branches:
+      - main
+      - preprod
+      - sandbox
+
+jobs:
+  create-preprod-pull-request:
+    if: contains(fromJSON('["main"]'), github.ref_name)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: preprod
+
+      - name: Reset promotion branch
+        run: |
+          git fetch origin ${{ github.ref_name }}:${{ github.ref_name }}
+          git reset --hard ${{ github.ref_name }}
+
+      - name: Create PR
+        id: create_pull_request_preprod
+        uses: peter-evans/create-pull-request@v4
+        with:
+          branch: preprod-promotion
+          title: Merge changes from ${{ github.ref_name }} to preprod
+          body: |
+            This PR merges changes from ${{ github.ref_name }} to preprod branch.
+          labels: automerge
+          token: ${{ secrets.AUTO_MERGE_PAT }}
+
+      - name: Enable PR automerge
+        if: steps.create_pull_request_preprod.outputs.pull-request-operation == 'created'
+        uses: peter-evans/enable-pull-request-automerge@v2
+        with:
+          token: ${{ secrets.AUTO_MERGE_PAT }}
+          pull-request-number: ${{ steps.create_pull_request_preprod.outputs.pull-request-number }}
+          merge-method: merge
+
+      - name: Auto approve PR
+        if: steps.create_pull_request_preprod.outputs.pull-request-operation == 'created'
+        uses: juliangruber/approve-pull-request-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ steps.create_pull_request_preprod.outputs.pull-request-number }}
+
+  create-sandbox-pull-request:
+    # if: contains(fromJSON('["main", "preprod"]'), github.ref_name)
+    if: contains(fromJSON('["preprod"]'), github.ref_name)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: sandbox
+
+      - name: Reset promotion branch
+        run: |
+          git fetch origin ${{ github.ref_name }}:${{ github.ref_name }}
+          git reset --hard ${{ github.ref_name }}
+
+      - name: Create PR
+        id: create_pull_request_sandbox
+        uses: peter-evans/create-pull-request@v4
+        with:
+          branch: sandbox-promotion
+          title: Merge changes from ${{ github.ref_name }} to sandbox
+          body: |
+            This PR merges changes from ${{ github.ref_name }} to sandbox branch.
+          labels: automerge
+          token: ${{ secrets.AUTO_MERGE_PAT }}
+
+      - name: Enable PR automerge
+        if: steps.create_pull_request_sandbox.outputs.pull-request-operation == 'created'
+        uses: peter-evans/enable-pull-request-automerge@v2
+        with:
+          token: ${{ secrets.AUTO_MERGE_PAT }}
+          pull-request-number: ${{ steps.create_pull_request_sandbox.outputs.pull-request-number }}
+          merge-method: merge
+
+      - name: Auto approve PR
+        if: steps.create_pull_request_sandbox.outputs.pull-request-operation == 'created'
+        uses: juliangruber/approve-pull-request-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ steps.create_pull_request_sandbox.outputs.pull-request-number }}
+
+  create-dev-pull-request:
+    # if: contains(fromJSON('["main", "preprod", "sandbox"]'), github.ref_name)
+    if: contains(fromJSON('["sandbox"]'), github.ref_name)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: dev
+
+      - name: Reset promotion branch
+        run: |
+          git fetch origin ${{ github.ref_name }}:${{ github.ref_name }}
+          git reset --hard ${{ github.ref_name }}
+
+      - name: Create PR
+        id: create_pull_request_dev
+        uses: peter-evans/create-pull-request@v4
+        with:
+          branch: dev-promotion
+          title: Merge changes from ${{ github.ref_name }} to dev
+          body: |
+            This PR merges changes from ${{ github.ref_name }} to dev branch.
+          labels: automerge
+          token: ${{ secrets.AUTO_MERGE_PAT }}
+
+      - name: Enable PR automerge
+        if: steps.create_pull_request_dev.outputs.pull-request-operation == 'created'
+        uses: peter-evans/enable-pull-request-automerge@v2
+        with:
+          token: ${{ secrets.AUTO_MERGE_PAT }}
+          pull-request-number: ${{ steps.create_pull_request_dev.outputs.pull-request-number }}
+          merge-method: merge
+
+      - name: Auto approve PR
+        if: steps.create_pull_request_dev.outputs.pull-request-operation == 'created'
+        uses: juliangruber/approve-pull-request-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ steps.create_pull_request_dev.outputs.pull-request-number }}
