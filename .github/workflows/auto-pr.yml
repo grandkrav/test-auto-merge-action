@@ -48,16 +48,46 @@ jobs:
           number: ${{ steps.create_pull_request_preprod.outputs.pull-request-number }}
 
   create-sandbox-pull-request:
-    if: contains(fromJSON('["some-not-exists"]'), github.ref_name)
-    # if: contains(fromJSON('["main", "preprod"]'), github.ref_name)
+    if: contains(fromJSON('["main", "preprod"]'), github.ref_name)
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+        with:
+          ref: sandbox
+
+      - name: Reset promotion branch
+        run: |
+          git fetch origin ${{ github.ref_name }}:${{ github.ref_name }}
+          git reset --hard ${{ github.ref_name }}
+
+      - name: Create PR
+        id: create_pull_request_sandbox
+        uses: peter-evans/create-pull-request@v4
+        with:
+          branch: sandbox-promotion
+          title: Merge changes from ${{ github.ref_name }} to sandbox
+          body: |
+            This PR merges changes from ${{ github.ref_name }} to sandbox branch.
+          labels: automerge
+          token: ${{ secrets.AUTO_MERGE_PAT }}
+
+      - name: Enable PR automerge
+        if: steps.create_pull_request_sandbox.outputs.pull-request-operation == 'created'
+        uses: peter-evans/enable-pull-request-automerge@v2
+        with:
+          token: ${{ secrets.AUTO_MERGE_PAT }}
+          pull-request-number: ${{ steps.create_pull_request_sandbox.outputs.pull-request-number }}
+          merge-method: merge
+
+      - name: Auto approve PR
+        if: steps.create_pull_request_sandbox.outputs.pull-request-operation == 'created'
+        uses: juliangruber/approve-pull-request-action@v2
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          number: ${{ steps.create_pull_request_sandbox.outputs.pull-request-number }}
 
   create-dev-pull-request:
-    if: contains(fromJSON('["some-not-exists"]'), github.ref_name)
-    # if: contains(fromJSON('["main", "preprod", "sandbox"]'), github.ref_name)
+    if: contains(fromJSON('["main", "preprod", "sandbox"]'), github.ref_name)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
